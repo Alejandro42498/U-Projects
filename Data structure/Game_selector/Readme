@@ -24,3 +24,6 @@ Si el usuario decide volver a realizar el test, el árbol se reinicia y comienza
 La interfaz también incluye un saludo inicial al usuario preguntando si desea comenzar el test.
 Nota: Asegúrate de tener las imágenes referenciadas en el código (game.png) en la ubicación correcta o ajusta las rutas de las imágenes según sea necesario. Además, 
 considera manejar las rutas de archivos de manera más robusta para entornos más generales.
+
+Enlace video de prueba:
+https://drive.google.com/drive/folders/1QvO_ElKyAPBjhejCzbC4d4Cv_UZRiesE?usp=sharing
