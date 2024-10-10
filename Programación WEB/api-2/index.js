@@ -4,7 +4,7 @@ import PDFDocument from 'pdfkit';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import joi from 'joi';
+import Joi from 'joi';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,23 +13,37 @@ const app = express();
 
 app.use(express.json());
 
-// Definición del esquema de validación de Joi
-
 const instrumentSchema = Joi.object({
-    nombre: Joi.string().required(),
-    referencia: Joi.string().required(),
-    marca: Joi.string().required(),
-    precio: Joi.number().required(),
-    disponible: Joi.boolean().required(),
-    peso_kg: Joi.number().required(),
-    garantia_meses: Joi.number().required()
-});
-
-app.get('/instruments', (req, res) => {
-    const instruments = read();
-    console.log('instruments', instruments);
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(instruments));
+    nombre: Joi.string()
+        .min(3).message('El nombre debe tener al menos 3 caracteres.') // Validación de longitud mínima
+        .max(50).message('El nombre no puede tener más de 50 caracteres.') // Validación de longitud máxima
+        .required(),
+    
+    referencia: Joi.string()
+        .pattern(/^[a-zA-Z0-9_-]+$/).message('La referencia solo puede contener letras, números, guiones y guiones bajos.') // Formato específico
+        .required(),
+    
+    marca: Joi.string()
+        .max(30).message('La marca no puede tener más de 30 caracteres.') // Validación de longitud máxima
+        .required(),
+    
+    precio: Joi.number()
+        .greater(0).message('El precio debe ser mayor que 0.') // Validación de valor mínimo
+        .less(10000).message('El precio no puede ser mayor que 10,000.') // Validación de valor máximo
+        .required(),
+    
+    disponible: Joi.boolean()
+        .required(), // Simple validación de tipo
+     
+    peso_kg: Joi.number()
+        .greater(0).message('El peso debe ser un número positivo.') // Validación de valor positivo
+        .required(),
+    
+    garantia_meses: Joi.number()
+        .integer().message('La garantía debe ser un número entero.') // Validación de tipo entero
+        .min(0).message('La garantía no puede ser menor que 0 meses.') // Validación de valor mínimo
+        .max(24).message('La garantía no puede ser mayor que 24 meses.') // Validación de valor máximo
+        .required()
 });
 
 app.get('/instruments',(req, res) => {
