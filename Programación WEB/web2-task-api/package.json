@@ -1,0 +1,25 @@
+{
+  "name": "web2-task-api",
+  "version": "0.0.1",
+  "description": "API para manejo de tareas",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [
+    "api",
+    "node",
+    "express",
+    "postgres",
+    "nodemon"
+  ],
+  "author": "Alejandro Gil Llano",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}

@@ -1,0 +1,265 @@
+1) Mostrar por consola, a través de un procedimiento almacenado, los nombres de los profesores que no dictaron alguna asignatura.
+
+create or replace function nombre_profesores()
+returns numeric as $$	
+	declare 
+	profesores RECORD; -- Declara una variable "profesores" que almacenará los resultados de la consulta.
+    contador int; -- Declara un contador que no se utiliza en el código, pero podría ser usado para contar el número de profesores.
+	begin 
+		FOR profesores IN 
+		select p.nombre, asign.nombre
+        from persona p 
+        INNER JOIN profesor prof ON prof.id_profesor = p.id
+        LEFT JOIN asignatura asign ON prof.id_profesor = asign.id_profesor
+        WHERE asign.id_profesor is null -- Selecciona los profesores que no están asociados a ninguna asignatura.
+        AND p.tipo = 'profesor' -- Filtra por personas cuyo tipo es "profesor".
+	LOOP 
+		RAISE NOTICE 'profesor sin asignatura %', profesores.nombre; -- Imprime en consola el nombre de cada profesor sin asignatura.
+   END LOOP;
+end;
+$$ language plpgsql  
+
+
+Copiar código
+do $$ 
+begin 
+ perform nombre_profesores();
+end $$
+
+
+2) Mostrar los nombres de las asignaturas y cantidad de estudiantes por asignatura a través de un procedimiento almacenado. 
+
+create or replace function numero_estudiantes()
+returns numeric as $$ 
+declare 
+  gente_asign RECORD; -- Declara un registro que almacenará los resultados de la consulta.
+  contador int:= 0; -- Inicializa un contador a cero, aunque no se usa en la lógica principal.
+begin 
+ FOR gente_asign IN 
+        SELECT asign.nombre, COUNT(asma.id_alumno) AS total_estudiantes
+        FROM asignatura asign 
+        INNER JOIN alumno_se_matricula_asignatura asma ON asma.id_asignatura = asign.id 
+        GROUP BY asign.nombre 
+        ORDER BY asign.nombre 
+    LOOP
+  raise notice '% INSCRITOS = %', gente_asign.nombre, gente_asign.total_estudiantes; -- Muestra el nombre de la asignatura y el número de estudiantes inscritos.
+  END LOOP;	
+end;
+$$ language plpgsql   
+
+DO $$ 
+BEGIN 
+  PERFORM numero_estudiantes(); 
+END $$ 
+
+
+
+3) Crear una tabla llamada "log", guardar un registro en la tabla "asignatura" por medio de un 
+procedimiento almacenado y agregar un registro en la tabla "log" con el ID de la asignatura, la fecha de ingreso y una descripción.
+
+CREATE TABLE log (
+    id_log  serial PRIMARY KEY, -- Define una columna "id_log" como clave primaria que se incrementa automáticamente.
+    id_asignatura INT NOT NULL, -- Define una columna "id_asignatura" que es obligatoria y almacena el ID de la asignatura.
+    fecha_ingreso DATE NOT NULL DEFAULT CURRENT_DATE, -- Almacena la fecha en que se ingresa el log; por defecto, la fecha actual.
+    descripcion VARCHAR(255) -- Campo para almacenar una breve descripción.
+);
+
+CREATE TYPE asign_type AS (
+    id INT, -- Define un tipo compuesto que representará una asignatura con sus atributos. El campo "id" es el identificador de la asignatura.
+    nombre VARCHAR(100), -- Campo que almacena el nombre de la asignatura.
+    creditos FLOAT, -- Campo que almacena el número de créditos de la asignatura.
+    tipo TIPO_ASIGNATURA, -- Campo que almacena el tipo de la asignatura (por ejemplo, obligatoria, optativa).
+    curso SMALLINT, -- Indica el curso al que pertenece la asignatura.
+    cuatrimestre SMALLINT, -- Indica el cuatrimestre en el que se dicta la asignatura.
+    id_profesor INT, -- ID del profesor asignado a la asignatura.
+    id_grado INT -- ID del grado o nivel al que pertenece la asignatura.
+);
+CREATE OR REPLACE FUNCTION insertar_asign(asign asign_type) 
+RETURNS void AS $$ -- Crea o reemplaza una función que no devuelve nada (tipo `void`).
+BEGIN
+    INSERT INTO asignatura (
+        id, nombre, creditos, tipo, curso, cuatrimestre, id_profesor, id_grado -- Define los campos que se insertarán en la tabla "asignatura".
+    ) VALUES (
+        asign.id, -- Asigna el valor del campo "id" del tipo "asign_type".
+        asign.nombre, -- Asigna el valor del campo "nombre" del tipo "asign_type".
+        asign.creditos, -- Asigna el valor del campo "creditos".
+        asign.tipo, -- Asigna el valor del campo "tipo".
+        asign.curso, -- Asigna el valor del campo "curso".
+        asign.cuatrimestre, -- Asigna el valor del campo "cuatrimestre".
+        asign.id_profesor, -- Asigna el valor del campo "id_profesor".
+        asign.id_grado -- Asigna el valor del campo "id_grado".
+    );
+
+    INSERT INTO log ( -- Inserta un nuevo registro en la tabla "log" para registrar esta operación.
+        id_asignatura, fecha_ingreso, descripcion -- Define los campos a insertar en la tabla "log".
+    ) VALUES (
+        asign.id, CURRENT_DATE, 'Nueva asignatura insertada' -- Inserta el ID de la asignatura, la fecha actual y una descripción.
+    );
+END;
+$$ LANGUAGE plpgsql; -- Indica que la función está escrita en PL/pgSQL.
+
+DO $$ -- Inicia un bloque anónimo PL/pgSQL para ejecutar la función.
+DECLARE 
+    a asign_type; -- Declara una variable "a" del tipo "asign_type".
+BEGIN
+    a.id := 85; -- Asigna el valor 85 al campo "id" de la asignatura.
+    a.nombre := 'Fundamentos de la insanidad'; -- Asigna el nombre de la asignatura.
+    a.creditos := 3; -- Asigna el número de créditos.
+    a.tipo := 'obligatoria'; -- Asigna el tipo de asignatura como obligatoria.
+    a.curso := 4; -- Indica que pertenece al cuarto curso.
+    a.cuatrimestre := 2; -- Indica que se dicta en el segundo cuatrimestre.
+    a.id_profesor := 3; -- Asigna el ID del profesor.
+    a.id_grado := 4; -- Asigna el ID del grado.
+
+    PERFORM insertar_asign(a); -- Llama a la función "insertar_asign" y le pasa la variable "a".
+END $$;
+
+SELECT * FROM asignatura WHERE id = 85; -- Consulta la tabla "asignatura" para verificar que se ha insertado correctamente la asignatura con ID 85.
+
+SELECT * FROM log WHERE id_asignatura = 85; -- Consulta la tabla "log" para verificar que se ha registrado el log de la asignatura con ID 85.
+
+4) Escribir una función que devuelva el promedio de salarios de los empleados, así como el salario más alto 
+y más bajo en la misma consulta. La función debe devolver un tipo compuesto.
+
+CREATE OR REPLACE FUNCTION salario_promedio() 
+RETURNS RECORD AS $$ -- Crea o reemplaza una función que devolverá un registro con varios valores (tipo compuesto).
+DECLARE
+    total_salario numeric := 0; -- Variable para almacenar la suma de todos los salarios.
+    contador numeric := 0; -- Variable para contar el número de salarios.
+    promedio_salario numeric := 0; -- Variable para almacenar el promedio de los salarios.
+    meses_salario numeric[]; -- Array de salarios.
+    salario_maximo numeric := -1; -- Variable para almacenar el salario más alto, inicializada en -1.
+    salario_minimo numeric := 999999; -- Variable para almacenar el salario más bajo, inicializada en un valor muy alto.
+BEGIN
+    meses_salario := array[30000, 50000, 40000, 60000]; -- Asigna un array con cuatro salarios.
+
+    FOR i IN 1..array_length(meses_salario, 1) LOOP -- Itera sobre los salarios en el array.
+        total_salario := total_salario + meses_salario[i]; -- Suma cada salario al total.
+
+        IF meses_salario[i] > salario_maximo THEN -- Si el salario actual es mayor que el salario máximo registrado.
+            salario_maximo := meses_salario[i]; -- Actualiza el salario máximo.
+        END IF;
+        
+        IF meses_salario[i] < salario_minimo THEN -- Si el salario actual es menor que el salario mínimo registrado.
+            salario_minimo := meses_salario[i]; -- Actualiza el salario mínimo.
+        END IF;
+    END LOOP;
+    
+    contador := array_length(meses_salario, 1); -- Cuenta la cantidad de salarios en el array.
+    IF contador > 0 THEN
+        promedio_salario := total_salario / contador; -- Calcula el promedio de los salarios.
+    END IF;
+    
+    RETURN (promedio_salario, salario_maximo, salario_minimo); -- Devuelve el promedio, el salario máximo y el salario mínimo.
+END;
+$$ LANGUAGE plpgsql; -- Indica que la función está escrita en PL/pgSQL.
+
+SELECT * FROM salario_promedio() AS (promedio numeric, maximo numeric, minimo numeric); -- Llama a la función y muestra los valores de promedio, salario máximo y salario mínimo.
+
+5) Escribir una función que reciba un array de números y devuelva la suma de todos sus elementos.
+
+CREATE OR REPLACE FUNCTION suma() 
+RETURNS numeric AS $$ -- Crea o reemplaza una función que devolverá un valor numérico.
+DECLARE
+    numeros numeric[] := ARRAY[10, 20, 30, 40, 50]; -- Declara un array de números.
+    suma_total numeric := 0; -- Inicializa la variable que almacenará la suma total.
+    i integer; -- Variable de control para el bucle.
+BEGIN
+    FOR i IN 1..array_length(numeros, 1) LOOP -- Itera sobre los elementos del array.
+        suma_total := suma_total + numeros[i]; -- Suma cada número al total.
+    END LOOP;
+    RAISE NOTICE 'La suma de los elementos es: %', suma_total; -- Muestra la suma total en la consola.
+END;
+$$ LANGUAGE plpgsql; -- Indica que la función está escrita en PL/pgSQL.
+
+DO $$ 
+BEGIN
+    PERFORM suma(); -- Llama a la función "suma" para mostrar la suma de los elementos.
+END $$;
+
+
+6)Escribe una función que simule la venta de productos en una tienda. La función debe actualizar el stock y registrar la venta. Si no hay suficiente stock, debe devolver un mensaje de error.
+se necesita crear dos tablas : Tabla de productos, Tabla de ventas.
+
+-- Crea una tabla llamada 'producto' con los campos id, nombre, stock y precio
+CREATE TABLE producto (
+    id SERIAL PRIMARY KEY,  -- Campo id que se incrementa automáticamente y es la clave primaria
+    nombre VARCHAR(255) NOT NULL,  -- Campo nombre que almacena el nombre del producto (no puede ser nulo)
+    stock INT NOT NULL,  -- Campo stock que almacena la cantidad disponible del producto (no puede ser nulo)
+    precio DECIMAL(10, 2) NOT NULL  -- Campo precio que almacena el precio del producto (no puede ser nulo)
+);
+
+-- Crea una tabla llamada 'venta' con los campos id_venta, producto_id, cantidad, total y fecha
+CREATE TABLE venta (
+    id_venta SERIAL PRIMARY KEY,  -- Campo id_venta que se incrementa automáticamente y es la clave primaria
+    producto_id INT REFERENCES producto(id),  -- Campo producto_id que hace referencia al id de la tabla producto
+    cantidad INT NOT NULL,  -- Campo cantidad que almacena la cantidad de producto vendido (no puede ser nulo)
+    total DECIMAL(10, 2) NOT NULL,  -- Campo total que almacena el total de la venta (no puede ser nulo)
+    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP  -- Campo fecha que almacena la fecha y hora de la venta, con un valor por defecto de la fecha actual
+);
+
+-- Inserta tres productos en la tabla 'producto' con sus respectivas cantidades y precios
+INSERT INTO producto (nombre, stock, precio) VALUES
+('Mouse', 50, 10000.00),  -- Inserta un Mouse con 50 unidades a un precio de 10,000.00
+('Teclado', 60, 40000.00),  -- Inserta un Teclado con 60 unidades a un precio de 40,000.00
+('Monitor', 70, 300000.00);  -- Inserta un Monitor con 70 unidades a un precio de 300,000.00
+
+-- Selecciona y muestra todos los productos en la tabla 'producto'
+SELECT * FROM producto;
+
+-- Crea o reemplaza una función llamada 'vender_producto' que acepta un id de producto y una cantidad
+CREATE OR REPLACE FUNCTION vender_producto(producto_id INT, cantidad INT)
+RETURNS TEXT AS $$  -- La función retorna un texto
+DECLARE
+    stock_actual INT;  -- Declara una variable para almacenar el stock actual del producto
+    precio_producto DECIMAL(10, 2);  -- Declara una variable para almacenar el precio del producto
+    total DECIMAL(10, 2);  -- Declara una variable para almacenar el total de la venta
+BEGIN
+    
+    -- Selecciona el stock y precio del producto según el id proporcionado
+    SELECT stock, precio INTO stock_actual, precio_producto 
+    FROM producto 
+    WHERE id = producto_id;
+
+    -- Verifica si el producto fue encontrado
+    IF NOT FOUND THEN
+        RETURN 'El producto no está en la base de datos.';  -- Retorna un mensaje si no se encuentra el producto
+    END IF;
+
+    -- Verifica si hay suficiente stock para la cantidad solicitada
+    IF stock_actual < cantidad THEN
+        RETURN 'No hay stock disponible.';  -- Retorna un mensaje si no hay suficiente stock
+    END IF;
+
+    -- Calcula el total de la venta
+    total := precio_producto * cantidad;
+
+    -- Inserta una nueva venta en la tabla 'venta' con el id del producto, cantidad y total
+    INSERT INTO venta (producto_id, cantidad, total)
+    VALUES (producto_id, cantidad, total);
+
+    -- Actualiza el stock del producto restando la cantidad vendida
+    UPDATE producto 
+    SET stock = stock - cantidad 
+    WHERE id = producto_id;
+
+    -- Retorna un mensaje indicando que la venta fue realizada correctamente junto con el total
+    RETURN 'Venta realizada correctamente, Total venta: ' || total;
+END;
+$$ LANGUAGE plpgsql;  -- Especifica que el lenguaje utilizado es PL/pgSQL
+
+-- Bloque anónimo para probar la función 'vender_producto'
+DO $$
+DECLARE 
+    idProducto INT := 1;  -- Declara una variable idProducto e inicializa con el valor 1
+    unidades INTEGER := 1;  -- Declara una variable unidades e inicializa con el valor 1
+    resultado TEXT;  -- Declara una variable resultado para almacenar el mensaje retornado por la función
+BEGIN
+    -- Llama a la función 'vender_producto' con idProducto y unidades, y almacena el resultado
+    resultado := vender_producto(idProducto, unidades);
+    -- Muestra el resultado en la consola
+    RAISE NOTICE '%', resultado;
+END $$; 
+
+-- Selecciona y muestra todas las ventas en la tabla 'venta'
+SELECT * FROM venta;

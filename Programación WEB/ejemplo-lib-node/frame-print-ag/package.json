@@ -1,0 +1,20 @@
+{
+  "name": "frame-print-daniel29",
+  "version": "0.0.1",
+  "description": "Libería para imprimir un mensaje",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ESModule",
+    "library",
+    "node"
+  ],
+  "author": "Daniel Salazar Castañeda",
+  "license": "ISC",
+  "dependencies": {
+    "frame-print-daniel29": "^0.0.1"
+  }
+}

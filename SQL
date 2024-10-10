@@ -1,0 +1,23 @@
+CREATE OR REPLACE FUNCTION ordenar_numeros(numeros integer[])
+RETURNS void AS $$
+DECLARE
+    numeros_ordenados integer[];
+BEGIN
+    IF array_length(numeros, 1) IS NOT NULL THEN
+        SELECT array_agg(num ORDER BY num) INTO numeros_ordenados
+        FROM unnest(numeros) AS num;
+
+RAISE NOTICE 'Los números ordenados son %', numeros_ordenados;
+    ELSE
+        RAISE NOTICE '.';
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+
+DO $$
+DECLARE
+    numeros_test integer[] := ARRAY[4, 2, 9, 1, 5];
+BEGIN
+    PERFORM ordenar_numeros(numeros_test);
+END $$;

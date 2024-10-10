@@ -52,6 +52,7 @@ function productDetails(products) {
             product_price: topPrice.product_price,
             product_quantity: topPrice.product_quantity
         }
+
     };
 }
 
