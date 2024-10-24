@@ -16,6 +16,7 @@
   "author": "alejandro gil",
   "license": "ISC",
   "dependencies": {
+    "dayjs": "^1.11.13",
     "express": "^4.21.1",
     "joi": "^17.13.3",
     "nodemon": "^3.1.7",

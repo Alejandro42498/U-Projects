@@ -1,5 +1,6 @@
 import express from 'express';
 import {read, write} from './src/utils/files.js';
+import {routerTasks} from './routes/index.js';
 
 const app = express();
 
@@ -102,6 +103,7 @@ app.delete('/tasks/:id', (req, res) => {
 
 
 
+routerTasks(app);
 
 app.listen(3000, () => {
     console.log('Server is running on port 3000');
