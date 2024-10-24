@@ -134,20 +134,55 @@
 			"response": []
 		},
 		{
-			"name": "Eliminar tarea",
+			"name": "updall",
 			"request": {
-				"method": "DELETE",
+				"method": "PUT",
 				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"field\": \"peso_kg\",\n    \"value\": 6\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
-					"raw": "http://localhost:3000/instruments/3",
+					"raw": "http://localhost:3000/api/v1/file/instruments/updall",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "3000",
 					"path": [
+						"api",
+						"v1",
+						"file",
 						"instruments",
-						"3"
+						"updall"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Eliminar tarea",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/api/v1/file/instruments/5",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"file",
+						"instruments",
+						"5"
 					]
 				}
 			},
