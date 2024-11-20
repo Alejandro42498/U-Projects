@@ -1,14 +1,17 @@
-import express from 'express';
+import express from 'express'
+import 'dotenv/config';
 import { routerTasks } from './routes/index.js';
-
+import { writeLog } from './utils/files.js';
 
 const app = express();
 
 app.use(express.json());
 
-//Crear Middleware
+
+// Crear Middleware 
 app.use((req, res, next) => {
     console.log('Middleware');
+    writeLog(req);
     next();
 })
 

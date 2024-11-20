@@ -19,7 +19,7 @@ export const ipMiddleware = (req, res, next) => {
 }
 //Middleware log
 export const logMiddleware = (req, res, next) => {
-    const now = dayjs().format('HH:mm DD-MM-YYYY');
+    const now = dayjs().format('DD-MM-YYYY HH:mm:ss');
 
     const method = req.method;
     const url = req.url;

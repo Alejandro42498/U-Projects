@@ -16,15 +16,10 @@
     "JSON",
     "fs"
   ],
-  "author": "Daniel Salazar Castañeda",
+  "author": "Alejandro Gil",
   "license": "ISC",
   "dependencies": {
     "express": "^4.21.0",
-    "pg": "^8.13.1",
-    "pg-hstore": "^2.3.4",
-    "sequelize": "^6.37.5"
-  },
-  "devDependencies": {
     "nodemon": "^3.1.7"
   }
 }

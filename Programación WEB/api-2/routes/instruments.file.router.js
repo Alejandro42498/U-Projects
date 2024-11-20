@@ -48,7 +48,6 @@ const instrumentSchema = Joi.object({
 instrumentsFileRouter.get('/', (req, res) => {
     let instruments = read(); 
     const { filterby, filterValue, limit } = req.query; 
-
     // Filtrar por el campo especificado y su valor PST http://localhost:3000/api/v1/file/instruments?filterby=nombre&filterValue=guitarra&limit=1
     if (filterby && filterValue) {
         instruments = instruments.filter(instrument => 
@@ -56,12 +55,10 @@ instrumentsFileRouter.get('/', (req, res) => {
             instrument[filterby].toString().toLowerCase() === filterValue.toLowerCase() 
         );
     }
-
     // Limit
     if (limit && !isNaN(limit)) {
         instruments = instruments.slice(0, parseInt(limit));
     }
-
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json(instruments);
 });
@@ -108,7 +105,6 @@ instrumentsFileRouter.put('/updall', (req, res) => {
     if (!field || value === undefined) {
         return res.status(400).json({ message: 'El campo y el valor son requeridos.' });
     }
-
     instruments.forEach(instrument => {
         instrument[field] = value; 
         if (!instrument.hasOwnProperty('updated_at')) {
