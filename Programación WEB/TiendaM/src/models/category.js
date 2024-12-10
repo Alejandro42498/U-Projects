@@ -1,9 +1,17 @@
-import { DataTypes } from 'sequelize';  // Usar import en lugar de require
-import { sequelize } from '../config/database.js';  // Usar import en lugar de require
+// src/models/category.js
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/database.js';
+import Product from './product.js';
 
 const Category = sequelize.define('Category', {
-  name: { type: DataTypes.STRING, allowNull: false, unique: true },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
 });
 
-export default Category;  // Usar export default en lugar de module.exports
+// Relación uno a muchos
+Category.hasMany(Product, { as: 'Products', foreignKey: 'categoryId' });
+Product.belongsTo(Category, { foreignKey: 'categoryId' });
 
+export default Category;

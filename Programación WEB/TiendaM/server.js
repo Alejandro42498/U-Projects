@@ -33,11 +33,13 @@ import indexRoutes from './src/routes/index.js';
 import authRoutes from './src/routes/auth.js';
 import categoriesRoutes from './src/routes/categories.js';
 import usersRoutes from './src/routes/users.js';
+import productRoutes from './src/routes/products.js';
 
 app.use('/', indexRoutes);
 app.use('/auth', authRoutes);
 app.use('/admin/categories', categoriesRoutes);
 app.use('/admin/users', usersRoutes);
+app.use('/admin/products', productRoutes);
 
 // Sincronización con la base de datos y levantamiento del servidor
 sequelize.sync({ alter: true }).then(() => {

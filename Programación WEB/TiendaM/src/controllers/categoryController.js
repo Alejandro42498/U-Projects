@@ -1,8 +1,12 @@
-import Category from '../models/category.js';  // Importar el modelo Category
+import Category from '../models/category.js'; // Importar el modelo Category
+import Product from '../models/product.js'; // Asegúrate de importar también el modelo Product para las asociaciones
 
+// Función para listar categorías
 export const listCategories = async (req, res) => {
   try {
-    const categories = await Category.findAll();
+    const categories = await Category.findAll({
+      include: [{ model: Product, as: 'Products' }],
+    });
     res.render('admin/categories', { categories });
   } catch (error) {
     console.error('Error al obtener categorías:', error);
@@ -10,6 +14,7 @@ export const listCategories = async (req, res) => {
   }
 };
 
+// Función para crear una nueva categoría
 export const createCategory = async (req, res) => {
   try {
     await Category.create(req.body);
@@ -20,6 +25,7 @@ export const createCategory = async (req, res) => {
   }
 };
 
+// Función para actualizar una categoría existente
 export const updateCategory = async (req, res) => {
   const { id } = req.params;
   try {
@@ -31,6 +37,7 @@ export const updateCategory = async (req, res) => {
   }
 };
 
+// Función para eliminar una categoría
 export const deleteCategory = async (req, res) => {
   const { id } = req.params;
   try {
