@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Tienda de Natación</title>
+    <!-- Enlace a Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <header class="bg-primary text-white text-center py-3">
+        <h1>Mi Tienda de Natación</h1>
+    </header>
+
+    <main class="container mt-4">
+        <div class="row" id="product-list">
+            <!-- Los productos serán insertados dinámicamente aquí -->
+        </div>
+    </main>
+
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <img src="https://via.placeholder.com/150" class="card-img-top" alt="Producto">
+            <div class="card-body">
+                <h5 class="card-title">Nombre del Producto</h5>
+                <p class="card-text">Descripción del producto.</p>
+                <p class="card-text text-success">Precio: $100</p>
+                <button class="btn btn-primary">Agregar al carrito</button>
+            </div>
+        </div>
+    </div>
+    
+<script>
+    // URL de tu API
+    const apiUrl = 'http://localhost:3000/products';
+
+    // Obtener productos y mostrarlos
+    async function loadProducts() {
+        try {
+            const response = await fetch(apiUrl, {
+                headers: {
+                    'Authorization': 'Bearer TU_TOKEN_AQUI' // Reemplaza con tu token
+                }
+            });
+            const products = await response.json();
+
+            const productList = document.getElementById('product-list');
+
+            products.forEach(product => {
+                const productCard = `
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            <img src="https://via.placeholder.com/150" class="card-img-top" alt="${product.name}">
+                            <div class="card-body">
+                                <h5 class="card-title">${product.name}</h5>
+                                <p class="card-text">${product.description}</p>
+                                <p class="card-text text-success">Precio: $${product.price}</p>
+                                <button class="btn btn-primary" onclick="addToCart(${product.id})">Agregar al carrito</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                productList.innerHTML += productCard;
+            });
+        } catch (error) {
+            console.error('Error al cargar los productos:', error);
+        }
+    }
+
+    // Agregar producto al carrito
+    async function addToCart(productId) {
+        try {
+            const response = await fetch('http://localhost:3000/cart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer TU_TOKEN_AQUI' // Reemplaza con tu token
+                },
+                body: JSON.stringify({ productId, quantity: 1 })
+            });
+
+            if (response.ok) {
+                alert('Producto agregado al carrito.');
+            } else {
+                const errorData = await response.json();
+                alert(`Error: ${errorData.error}`);
+            }
+        } catch (error) {
+            console.error('Error al agregar al carrito:', error);
+        }
+    }
+
+    // Cargar los productos al cargar la página
+    loadProducts();
+</script>
+
+    <!-- Enlace al script de Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

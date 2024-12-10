@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/header'); %>
+</head>
+<body>
+  <%- include('../partials/navbar'); %>
+
+  <div class="container mt-5">
+    <h1 class="text-center">Carrito de Compras</h1>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Cantidad</th>
+          <th>Precio Unitario</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Productos en el carrito -->
+      </tbody>
+    </table>
+    <form action="/checkout" method="POST">
+      <div class="mb-3">
+        <label for="name" class="form-label">Nombre</label>
+        <input type="text" name="name" id="name" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label for="address" class="form-label">Dirección</label>
+        <input type="text" name="address" id="address" class="form-control" required>
+      </div>
+      <button type="submit" class="btn btn-success w-100">Realizar Pedido</button>
+    </form>
+  </div>
+
+  <%- include('../partials/footer'); %>
+</body>
+</html>
